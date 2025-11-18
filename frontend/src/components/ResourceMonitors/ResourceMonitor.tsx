@@ -6,13 +6,13 @@ import "./ResourceMonitor.css";
 interface ResourceMonitorProps {
   label: string;
   linksTo?: string | null;
-  content: any;
+  children: React.ReactNode;
 }
 
 export function ResourceMonitor({
   label,
   linksTo = null,
-  content,
+  children,
 }: ResourceMonitorProps) {
   const navigate = useNavigate();
   const setLink =
@@ -24,7 +24,7 @@ export function ResourceMonitor({
       : {};
   return (
     <Card shadow="none" {...setLink}>
-      <Card.Section className="resourceSection">{content}</Card.Section>
+      <Card.Section className="resourceSection">{children}</Card.Section>
       <Card.Section>
         <Center>
           <Text>{label}</Text>

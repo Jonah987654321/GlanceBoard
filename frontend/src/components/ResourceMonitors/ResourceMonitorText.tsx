@@ -13,14 +13,12 @@ export function ResourceMonitorText({
   linksTo = null,
 }: ResourceMonitorTextProps) {
   return (
-    <ResourceMonitor
-      label={label}
-      linksTo={linksTo}
-      content={
-          <Center style={{ height: "100%" }}>
-            <Text size="xl" fw={700}>{value}</Text>
-          </Center>
-      }
-    />
+    <ResourceMonitor label={label} linksTo={linksTo}>
+      <Center style={{ height: "100%" }}>
+        <Text size="xl" fw={700}>
+          {value}
+        </Text>
+      </Center>
+    </ResourceMonitor>
   );
 }

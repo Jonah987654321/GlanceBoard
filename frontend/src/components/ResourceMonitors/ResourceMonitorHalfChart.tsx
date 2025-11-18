@@ -23,23 +23,19 @@ export function ResourceMonitorHalfChart({
       ? "yellow"
       : "red";
   return (
-    <ResourceMonitor
-      label={label}
-      linksTo={linksTo}
-      content={
-          <DonutChart
-            data={[
-              { name: "In use", value: valueInUse, color: usageColor },
-              { name: "Free", value: 100 - valueInUse, color: "gray.5" },
-            ]}
-            thickness={25}
-            startAngle={180}
-            endAngle={0}
-            tooltipDataSource="segment"
-            mx="auto"
-            chartLabel={valueInUse + "%"}
-          />
-      }
-    />
+    <ResourceMonitor label={label} linksTo={linksTo}>
+      <DonutChart
+        data={[
+          { name: "In use", value: valueInUse, color: usageColor },
+          { name: "Free", value: 100 - valueInUse, color: "gray.5" },
+        ]}
+        thickness={25}
+        startAngle={180}
+        endAngle={0}
+        tooltipDataSource="segment"
+        mx="auto"
+        chartLabel={valueInUse + "%"}
+      />
+    </ResourceMonitor>
   );
 }

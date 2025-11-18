@@ -9,6 +9,9 @@ import {
   ScrollArea,
   Space,
   Center,
+  Image,
+  Title,
+  Text,
 } from "@mantine/core";
 import { useDisclosure } from "@mantine/hooks";
 
@@ -33,7 +36,7 @@ export default function App() {
         <AppShell
           padding="md"
           navbar={{
-            width: 200,
+            width: 250,
             breakpoint: "sm",
             collapsed: { mobile: !mobileOpened, desktop: false },
           }}
@@ -41,7 +44,11 @@ export default function App() {
           <AppShell.Navbar>
             <AppShell.Section>
               <Space h="md" />
-              <Center>Navbar header</Center>
+              <Center>
+                <Image src="dashboard.png" height={30} w="auto"></Image>
+                <Space w="xs" />
+                <Title size={30}>GlanceBoard</Title>
+              </Center>
               <Space h="xl" />
             </AppShell.Section>
             <AppShell.Section grow component={ScrollArea}>
@@ -69,7 +76,11 @@ export default function App() {
               />
               <SidebarLink to="/history" label="History" Icon={GoHistory} />
             </AppShell.Section>
-            <AppShell.Section>Footer</AppShell.Section>
+            <AppShell.Section>
+              <Center>
+                <Text>© Jonah Emme, 2025</Text>
+              </Center>
+            </AppShell.Section>
           </AppShell.Navbar>
 
           <AppShell.Main>

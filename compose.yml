@@ -12,14 +12,24 @@ services:
       - /etc/os-release:/etc/os-release:ro
     pid: "host"
 
+  ping-api:
+    build:
+      context: ./ping-api
+    container_name: ping-api
+    restart: always
+    ports:
+      - "22223:22223"
+
   glanceboard:
     build:
       context: ./frontend
     container_name: glanceboard
     restart: always
     ports:
-      - "2222:80"
+      - "22222:80"
     depends_on:
       - glances
+      - ping-api
     environment:
-      VITE_API_URL: "http://host.docker.internal:61208"  # Falls du Vite env variables nutzt
+      VITE_API_URL: "http://host.docker.internal:61208"
+      VITE_PING_API: "http://ping-api:22223"

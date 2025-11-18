@@ -23,7 +23,7 @@ export function ResourceMonitorList({
         <Space h="md" />
       </Card.Section>
       <Card.Section>
-        {components.map((component, index) => (<>{ component }</>))}
+        {components.map((component, _) => (<>{ component }</>))}
       </Card.Section>
     </Card>
   );

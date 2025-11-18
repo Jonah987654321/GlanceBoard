@@ -1,23 +1,52 @@
 import { Center, Grid, Space } from "@mantine/core";
 
 import { ResourceMonitorHalfChart } from "../components/ResourceMonitors/ResourceMonitorHalfChart";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ResourceMonitorText } from "../components/ResourceMonitors/ResourceMonitorText";
 import { ResourceMonitorBundle } from "../components/ResourceMonitors/ResourceMonitorBundle";
 import { ResourceMonitorList } from "../components/ResourceMonitors/ResourceMonitorList";
 
-import { AiOutlineExclamation } from "react-icons/ai";
 import { Alert } from "../components/Alert";
 import { ProcessListItem } from "../components/ResourceMonitors/ProcessListItem";
 
 export function Overview() {
-  const [cpuUsage, setCpuUsage] = useState<number>(85);
-  const [ramUsage, setRamUsage] = useState<number>(85);
-  const [storageUsage, setStorageUsage] = useState<number>(85);
+  const [cpuUsage, setCpuUsage] = useState<number>(0);
+  const [ramUsage, setRamUsage] = useState<number>(0);
+  const [storageUsage, setStorageUsage] = useState<number>(0);
 
-  const [uptime, setUptime] = useState<string>("6 days");
-  const [cpuTemp, setCpuTemp] = useState<number>(50);
-  const [ping, setPing] = useState<number>(20);
+  const [uptime, setUptime] = useState<string>("N/A");
+  const [cpuTemp, setCpuTemp] = useState<number>(0);
+  const [ping, setPing] = useState<number>(0);
+
+  useEffect(() => {
+    // Funktion zum Laden der Daten von der API
+    const fetchData = async () => {
+      try {
+        const res = await fetch(import.meta.env.VITE_API_URL+"/api/4/all"); // API URL
+        const data = await res.json();
+
+        // Beispiel: CPU, RAM, Storage, Uptime, etc. aus dem API Response setzen
+        setCpuUsage(data.cpu.total); // Beispiel, je nach Glances API Struktur
+        setRamUsage(data.mem.percent);
+        setStorageUsage(data.fs[0].percent);
+        setUptime(data.uptime.split(",")[0]);
+        setCpuTemp(data.sensors[0].value || 0);
+        setPing(data.network[0]?.ping || 0);
+      } catch (err) {
+        console.error("Fehler beim Laden der API:", err);
+      }
+    };
+
+    // Erstmal Daten laden
+    fetchData();
+
+    // Intervall starten
+    const intervalId = setInterval(fetchData, 1000); // alle 1 Sekunde
+
+    // Cleanup: Intervall löschen, wenn Component unmountet
+    return () => clearInterval(intervalId);
+  }, []);
+
   return (
     <>
       <Center>

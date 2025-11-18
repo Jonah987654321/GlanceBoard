@@ -1,4 +1,4 @@
-import { DonutChart } from "@mantine/charts";
+import { Center, SemiCircleProgress } from "@mantine/core";
 import { ResourceMonitor } from "./ResourceMonitor";
 
 interface ResourceHalfChartProps {
@@ -24,18 +24,17 @@ export function ResourceMonitorHalfChart({
       : "red";
   return (
     <ResourceMonitor label={label} linksTo={linksTo}>
-      <DonutChart
-        data={[
-          { name: "In use", value: valueInUse, color: usageColor },
-          { name: "Free", value: 100 - valueInUse, color: "gray.5" },
-        ]}
-        thickness={25}
-        startAngle={180}
-        endAngle={0}
-        tooltipDataSource="segment"
-        mx="auto"
-        chartLabel={valueInUse + "%"}
-      />
+      <Center>
+        <SemiCircleProgress
+          fillDirection="left-to-right"
+          orientation="up"
+          filledSegmentColor={usageColor}
+          value={valueInUse}
+          thickness={25}
+          label={valueInUse + "%"}
+          transitionDuration={1000} 
+        />
+      </Center>
     </ResourceMonitor>
   );
 }

@@ -23,6 +23,9 @@ services:
   glanceboard:
     build:
       context: ./frontend
+      #args:
+      #  VITE_GLANCES_API:"ENTER_A_CUSTOM_GLANCES_URL"
+      #  VITE_PING_API:"ENTER_A_CUSTOM_PING_URL"
     container_name: glanceboard
     restart: always
     ports:
@@ -30,6 +33,3 @@ services:
     depends_on:
       - glances
       - ping-api
-    environment:
-      VITE_API_URL: "http://host.docker.internal:61208"
-      VITE_PING_API: "http://ping-api:22223"

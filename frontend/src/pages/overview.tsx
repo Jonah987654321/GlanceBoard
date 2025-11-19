@@ -10,14 +10,33 @@ import { Alert } from "../components/Alert";
 import { ProcessListItem } from "../components/ResourceMonitors/ProcessListItem";
 import type { ProcessItem } from "../components/ResourceMonitors/ProcessListItem";
 
+function getGlanceAPIURL() {
+  if (import.meta.env.VITE_GLANCES_API == undefined || import.meta.env.VITE_GLANCES_API.trim().length === 0) {
+    return (
+      window.location.protocol + "//" + window.location.hostname + ":61208"
+    );
+  } else {
+    return import.meta.env.VITE_GLANCES_API;
+  }
+}
+
+function getPingAPIURL() {
+  if (import.meta.env.VITE_PING_API == undefined || import.meta.env.VITE_PING_API.trim().length === 0) {
+    return (
+      window.location.protocol + "//" + window.location.hostname + ":22223"
+    );
+  } else {
+    return import.meta.env.VITE_PING_API;
+  }
+}
+
 export function Overview() {
+  console.log(getGlanceAPIURL());
   const [processes, setProcesses] = useState<ProcessItem[]>([]);
   useEffect(() => {
     async function fetchProcesses() {
       try {
-        const res = await fetch(
-          import.meta.env.VITE_API_URL + "/api/4/processlist"
-        );
+        const res = await fetch(getGlanceAPIURL() + "/api/4/processlist");
         const apiData = await res.json();
 
         // Only keep processes taking at least 1% cpu
@@ -75,17 +94,17 @@ export function Overview() {
     const fetchResources = async () => {
       try {
         // Fetch CPU
-        const cpuRes = await fetch(import.meta.env.VITE_API_URL + "/api/4/cpu"); // API URL
+        const cpuRes = await fetch(getGlanceAPIURL() + "/api/4/cpu"); // API URL
         const cpuData = await cpuRes.json();
         setCpuUsage(cpuData.total);
 
         // Fetch RAM
-        const memRes = await fetch(import.meta.env.VITE_API_URL + "/api/4/mem"); // API URL
+        const memRes = await fetch(getGlanceAPIURL() + "/api/4/mem"); // API URL
         const memData = await memRes.json();
         setRamUsage(memData.percent);
 
         // Fetch Storage usage
-        const fsRes = await fetch(import.meta.env.VITE_API_URL + "/api/4/fs"); // API URL
+        const fsRes = await fetch(getGlanceAPIURL() + "/api/4/fs"); // API URL
         const fsData = await fsRes.json();
         setStorageUsage(fsData[0].percent);
       } catch (err) {
@@ -109,21 +128,17 @@ export function Overview() {
     const fetchTelemetry = async () => {
       try {
         // Fetch Uptime
-        const uptimeRes = await fetch(
-          import.meta.env.VITE_API_URL + "/api/4/uptime"
-        );
+        const uptimeRes = await fetch(getGlanceAPIURL() + "/api/4/uptime");
         const uptimeData = await uptimeRes.text();
-        setUptime(uptimeData.split(",")[0].substring(1));
+        setUptime(uptimeData.substring(1, uptimeData.length-1));
 
         // Fetch sensors
-        const sensorRes = await fetch(
-          import.meta.env.VITE_API_URL + "/api/4/sensors"
-        ); // API URL
+        const sensorRes = await fetch(getGlanceAPIURL() + "/api/4/sensors"); // API URL
         const sensorData = await sensorRes.json();
         setCpuTemp(sensorData[0].value || 0);
 
         // Fetch ping
-        const pingRes = await fetch(`${import.meta.env.VITE_PING_API}/ping`);
+        const pingRes = await fetch(getPingAPIURL()+"/ping");
         if (!pingRes.ok) throw new Error("Ping API Error");
 
         const data = await pingRes.json();

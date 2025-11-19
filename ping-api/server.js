@@ -12,11 +12,23 @@ const hosts = ["8.8.8.8", "1.1.1.1"];
 let selectedHost = hosts[0];
 
 // Ping history
-const PING_HISTORY = [];
+let PING_HISTORY = [];
 const HISTORY_DURATION = 10000; // 10 seconds
+
+// Last received request
+let lastReceived = Date.now();
+const RUN_PING_THRESHOLD = 30000 // 30 seconds
 
 // Function for retrieving the ping
 async function updatePing() {
+  // Remove old values
+  const cutoff = Date.now() - HISTORY_DURATION;
+  PING_HISTORY = PING_HISTORY.filter(p => p.time >= cutoff);
+
+  if (Date.now() - lastReceived > RUN_PING_THRESHOLD) {
+    return;
+  }
+
   for (const host of hosts) {
     const res = await ping.promise.probe(host, { timeout: 1 });
     if (res.alive) {
@@ -25,12 +37,6 @@ async function updatePing() {
       break;
     }
   }
-
-  // Remove old values
-  const cutoff = Date.now() - HISTORY_DURATION;
-  while (PING_HISTORY.length && PING_HISTORY[0].time < cutoff) {
-    PING_HISTORY.shift();
-  }
 }
 
 // Update every 1 second
@@ -38,6 +44,8 @@ setInterval(updatePing, 1000);
 
 // API Endpoint
 app.get("/ping", (req, res) => {
+  lastReceived = Date.now();
+
   if (!PING_HISTORY.length) {
     return res.json({ host: selectedHost, average: null });
   }

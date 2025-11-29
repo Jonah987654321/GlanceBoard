@@ -1,23 +1,23 @@
 import { Flex, Notification, Text } from "@mantine/core";
 import { AiOutlineExclamation } from "react-icons/ai";
 
-interface AlertProps {
+export interface Alert {
   type: string;
   content: string;
   timestamp: number;
-  alertTarget?: string | null;
+  target?: string | null;
 }
 
-export function Alert({
-  type,
-  content,
-  timestamp,
-  alertTarget = null,
-}: AlertProps) {
-  const color = type == "CRITICAL" ? "red" : "yellow";
-  const backgroundColor = type == "CRITICAL" ? "#ffbfbfff" : "#fff9bfff";
-  const date = new Date(timestamp * 1000);
-  const title = type+(alertTarget!=null?" - Type: "+alertTarget:"");
+interface AlertProps {
+  alert: Alert;
+}
+
+export function Alert({ alert }: AlertProps) {
+  const color = alert.type == "CRITICAL" ? "red" : "yellow";
+  const backgroundColor = alert.type == "CRITICAL" ? "#ffbfbfff" : "#fff9bfff";
+  const date = new Date(alert.timestamp * 1000);
+  const title =
+    alert.type + (alert.target != null ? " - Type: " + alert.target : "");
   return (
     <Notification
       withCloseButton={false}
@@ -27,7 +27,7 @@ export function Alert({
       styles={{ root: { backgroundColor: backgroundColor } }}
     >
       <Flex justify="space-between" align="center">
-        <Text>{content}</Text>
+        <Text>{alert.content}</Text>
         <Text opacity={0.7}>{date.toLocaleString()}</Text>
       </Flex>
     </Notification>

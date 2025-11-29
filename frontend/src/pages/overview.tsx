@@ -11,7 +11,10 @@ import { ProcessListItem } from "../components/ResourceMonitors/ProcessListItem"
 import type { ProcessItem } from "../components/ResourceMonitors/ProcessListItem";
 
 function getGlanceAPIURL() {
-  if (import.meta.env.VITE_GLANCES_API == undefined || import.meta.env.VITE_GLANCES_API.trim().length === 0) {
+  if (
+    import.meta.env.VITE_GLANCES_API == undefined ||
+    import.meta.env.VITE_GLANCES_API.trim().length === 0
+  ) {
     return (
       window.location.protocol + "//" + window.location.hostname + ":61208"
     );
@@ -21,7 +24,10 @@ function getGlanceAPIURL() {
 }
 
 function getPingAPIURL() {
-  if (import.meta.env.VITE_PING_API == undefined || import.meta.env.VITE_PING_API.trim().length === 0) {
+  if (
+    import.meta.env.VITE_PING_API == undefined ||
+    import.meta.env.VITE_PING_API.trim().length === 0
+  ) {
     return (
       window.location.protocol + "//" + window.location.hostname + ":22223"
     );
@@ -130,7 +136,7 @@ export function Overview() {
         // Fetch Uptime
         const uptimeRes = await fetch(getGlanceAPIURL() + "/api/4/uptime");
         const uptimeData = await uptimeRes.text();
-        setUptime(uptimeData.substring(1, uptimeData.length-1));
+        setUptime(uptimeData.substring(1, uptimeData.length - 1));
 
         // Fetch sensors
         const sensorRes = await fetch(getGlanceAPIURL() + "/api/4/sensors"); // API URL
@@ -138,7 +144,7 @@ export function Overview() {
         setCpuTemp(sensorData[0].value || 0);
 
         // Fetch ping
-        const pingRes = await fetch(getPingAPIURL()+"/ping");
+        const pingRes = await fetch(getPingAPIURL() + "/ping");
         if (!pingRes.ok) throw new Error("Ping API Error");
 
         const data = await pingRes.json();
@@ -151,8 +157,42 @@ export function Overview() {
     // Init data
     fetchTelemetry();
 
-    // Intervall starten
     const intervalId = setInterval(fetchTelemetry, 10000); // Call every 10sec
+
+    // Cleanup
+    return () => clearInterval(intervalId);
+  }, []);
+
+  const [hostname, setHostname] = useState<string>("");
+  useEffect(() => {
+    const fetchHostname = async () => {
+      const res = await fetch(getGlanceAPIURL() + "/api/4/system"); // API URL
+      const data = await res.json();
+      setHostname(data.hostname);
+    };
+
+    fetchHostname();
+  });
+
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+  useEffect(() => {
+    const getAlerts = async () => {
+      const res = await fetch(getGlanceAPIURL() + "/api/4/alert");
+      const data = await res.json();
+
+      const mapped: Alert[] = data.map((item: any) => ({
+        type: item.state,
+        content: item.global_msg,
+        timestamp: item.begin,
+        target: item.type || null,
+      }));
+
+      setAlerts(mapped);
+    };
+
+    getAlerts();
+
+    const intervalId = setInterval(getAlerts, 10000); // Call every 10sec
 
     // Cleanup
     return () => clearInterval(intervalId);
@@ -162,7 +202,7 @@ export function Overview() {
     <>
       <Center>
         <h1>
-          Monitoring Overview for <i>piserver</i>
+          Monitoring Overview for <i>{hostname}</i>
         </h1>
         <Space h="md" />
       </Center>
@@ -220,19 +260,9 @@ export function Overview() {
         >
           <ResourceMonitorList
             title="Notifications & Warnings"
-            components={[
-              <Alert
-                type="CRITICAL"
-                content="You should handle this"
-                timestamp={1762177546}
-                alertTarget="MEM"
-              />,
-              <Alert
-                type="WARNING"
-                content="Could really be worse"
-                timestamp={176213546}
-              />,
-            ]}
+            components={alerts.map((a) => (
+              <Alert alert={a} />
+            ))}
           />
         </Grid.Col>
         <Grid.Col
